@@ -3,20 +3,29 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/invoice.dart';
 
 class ExportService {
-  static const String workshopName = "POP KHATA WORKSHOP";
-  static const String workshopAddress = "Main Market, Lahore";
-  static const String workshopPhone = "0300-1234567";
+  
+  // Settings se data nikalne ka helper function
+  static Future<Map<String, String>> _getWorkshopDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'shopName': prefs.getString('shopName') ?? 'ROYAL POP WORKSHOP',
+      'tagline': prefs.getString('tagline') ?? 'Plaster & False Ceiling Works',
+      'phone': prefs.getString('phone') ?? '0300-0000000',
+      'address': prefs.getString('address') ?? '',
+    };
+  }
 
   // ==========================================
   // 1. RAWBT THERMAL TEXT FORMAT (32-Column)
   // ==========================================
   static Future<void> shareAsTextForThermal(Invoice invoice) async {
+    final details = await _getWorkshopDetails();
     StringBuffer sb = StringBuffer();
 
-    // Center alignment helper (32 columns max)
     String centerText(String text) {
       if (text.length >= 32) return text.substring(0, 32);
       int leftPad = ((32 - text.length) / 2).floor();
@@ -29,10 +38,11 @@ class ExportService {
       return left + (' ' * space) + right;
     }
 
-    // Header
-    sb.writeln(centerText(workshopName));
-    sb.writeln(centerText(workshopAddress));
-    sb.writeln(centerText("Ph: $workshopPhone"));
+    // Dynamic Header
+    sb.writeln(centerText(details['shopName']!));
+    if (details['tagline']!.isNotEmpty) sb.writeln(centerText(details['tagline']!));
+    if (details['address']!.isNotEmpty) sb.writeln(centerText(details['address']!));
+    if (details['phone']!.isNotEmpty) sb.writeln(centerText("Ph: ${details['phone']}"));
     sb.writeln("-" * 32);
     
     // Bill Info
@@ -45,10 +55,8 @@ class ExportService {
     // Items
     sb.writeln(rightAlign("Item", "Total"));
     for (var item in invoice.items) {
-      // Line 1: Item Name (truncated if too long)
       String itemName = item.productName.length > 32 ? item.productName.substring(0, 32) : item.productName;
       sb.writeln(itemName);
-      // Line 2: Qty x Rate             Total
       String qtyRate = "  ${item.quantity} x Rs.${item.rate.toStringAsFixed(0)}";
       String total = "Rs.${item.total.toStringAsFixed(0)}";
       sb.writeln(rightAlign(qtyRate, total));
@@ -63,9 +71,8 @@ class ExportService {
     }
     sb.writeln("-" * 32);
     sb.writeln(centerText("Thank You!"));
-    sb.writeln("\n\n\n"); // Auto-feed for cutter
+    sb.writeln("\n\n\n");
 
-    // Share Text (RawBT isay intercept kar lega)
     await Share.share(sb.toString(), subject: 'Invoice ${invoice.invoiceNumber}');
   }
 
@@ -73,6 +80,7 @@ class ExportService {
   // 2. WHATSAPP PDF FORMAT
   // ==========================================
   static Future<void> shareAsPdf(Invoice invoice) async {
+    final details = await _getWorkshopDetails();
     final pdf = pw.Document();
     String formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(invoice.date));
 
@@ -83,13 +91,14 @@ class ExportService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // PDF Header
+              // Dynamic PDF Header
               pw.Center(
                 child: pw.Column(
                   children: [
-                    pw.Text(workshopName, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                    pw.Text(workshopAddress, style: const pw.TextStyle(fontSize: 14)),
-                    pw.Text("Ph: $workshopPhone", style: const pw.TextStyle(fontSize: 14)),
+                    pw.Text(details['shopName']!, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                    if (details['tagline']!.isNotEmpty) pw.Text(details['tagline']!, style: const pw.TextStyle(fontSize: 14)),
+                    if (details['address']!.isNotEmpty) pw.Text(details['address']!, style: const pw.TextStyle(fontSize: 14)),
+                    if (details['phone']!.isNotEmpty) pw.Text("Ph: ${details['phone']}", style: const pw.TextStyle(fontSize: 14)),
                   ],
                 ),
               ),
@@ -111,7 +120,6 @@ class ExportService {
               pw.Divider(),
               pw.SizedBox(height: 10),
 
-              // Items Table
               pw.TableHelper.fromTextArray(
                 context: context,
                 border: pw.TableBorder.all(width: 0.5),
@@ -128,8 +136,6 @@ class ExportService {
                 ],
               ),
               pw.SizedBox(height: 20),
-
-              // Totals Section
               pw.Container(
                 alignment: pw.Alignment.centerRight,
                 child: pw.Column(
@@ -148,7 +154,6 @@ class ExportService {
       ),
     );
 
-    // Save and Share PDF
     await Printing.sharePdf(
       bytes: await pdf.save(),
       filename: '${invoice.invoiceNumber}_${invoice.customerName}.pdf',
