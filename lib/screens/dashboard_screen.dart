@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../services/database_helper.dart';
 import '../models/invoice.dart';
-import 'package:intl/intl.dart';
+
+// Tamam screens ko import kar rahay hain
+import 'bill_screen.dart';
+import 'return_screen.dart';
+import 'customer_ledger_screen.dart';
+import 'products_screen.dart';
+import 'invoice_history_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -23,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadDashboardData();
   }
 
+  // Dashboard counters load karne ka function
   Future<void> _loadDashboardData() async {
     setState(() => isLoading = true);
     
@@ -39,6 +47,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       
       // Aaj ki date filter
       if (invoice.date.startsWith(todayDate)) {
+        // Return Invoices negative hoty hain, wo automatically net amount theek kar denge
         count++;
         cash += invoice.cashReceived;
         udhar += invoice.udharAmount;
@@ -59,7 +68,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('POP Khata', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('POP Khata Workshop', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         actions: [
@@ -74,9 +83,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.cloud_sync),
                   onPressed: () {
-                    // Sync logic yahan aayegi
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Syncing data to Google Sheets...')),
+                      const SnackBar(content: Text('Syncing data to Google Sheets... (Coming Soon)')),
                     );
                   },
                 ),
@@ -125,7 +133,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 12),
                     _buildSummaryCard(
-                      title: 'Kul Bills Aaj',
+                      title: 'Kul Bills Aaj (Wapsi Samet)',
                       amount: todayBillsCount.toString(),
                       color: Colors.blueGrey,
                       icon: Icons.receipt_long,
@@ -134,12 +142,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     
                     const SizedBox(height: 32),
                     const Text(
-                      'Quick Actions',
+                      'Main Menu',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
                     const SizedBox(height: 16),
                     
-                    // 4 Main Navigation Buttons
+                    // Navigation Buttons Grid
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
@@ -153,7 +161,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           icon: Icons.add_shopping_cart,
                           color: Colors.teal,
                           onTap: () {
-                            // Navigate to Bill Screen
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const BillScreen())).then((_) => _loadDashboardData());
+                          },
+                        ),
+                        _buildNavButton(
+                          title: 'Maal Wapsi\n(Return)',
+                          icon: Icons.assignment_return,
+                          color: Colors.blueAccent,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ReturnScreen())).then((_) => _loadDashboardData());
                           },
                         ),
                         _buildNavButton(
@@ -161,15 +177,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           icon: Icons.menu_book,
                           color: Colors.orange,
                           onTap: () {
-                            // Navigate to Customer Ledger
-                          },
-                        ),
-                        _buildNavButton(
-                          title: 'Products\n(Stock List)',
-                          icon: Icons.inventory_2,
-                          color: Colors.purple,
-                          onTap: () {
-                            // Navigate to Products Catalog
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const CustomerLedgerScreen())).then((_) => _loadDashboardData());
                           },
                         ),
                         _buildNavButton(
@@ -177,7 +185,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           icon: Icons.history,
                           color: Colors.indigo,
                           onTap: () {
-                            // Navigate to Invoice History
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const InvoiceHistoryScreen())).then((_) => _loadDashboardData());
+                          },
+                        ),
+                        _buildNavButton(
+                          title: 'Products\n(Stock List)',
+                          icon: Icons.inventory_2,
+                          color: Colors.purple,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductsScreen())).then((_) => _loadDashboardData());
                           },
                         ),
                       ],
@@ -207,7 +223,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(color: color.withOpacity(0.8), fontWeight: FontWeight.w600, fontSize: 14),
+                  style: TextStyle(color: color.withOpacity(0.8), fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
             ],
