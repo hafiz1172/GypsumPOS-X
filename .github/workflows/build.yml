@@ -32,20 +32,19 @@ jobs:
       - name: Create missing platform folders
         run: flutter create --platforms android .
 
-      - name: Force Overwrite SDK Versions in Gradle
+      - name: Fix SDK version via Python
         run: |
-          # build.gradle.kts ke andar direct 36 likhna taake printing plugin ka masla khatam ho jaye
-          FILE="android/app/build.gradle.kts"
-          if [ -f "$FILE" ]; then
-            echo "Modifying $FILE..."
-            echo 'android { compileSdk = 36 }' >> $FILE
-          fi
-          
-          # Project level gradle me bhi support add karna
-          PROJ_FILE="android/build.gradle"
-          if [ -f "$PROJ_FILE" ]; then
-            echo "allprojects { repositories { google() mavenCentral() } }" >> $PROJ_FILE
-          fi
+          python3 -c '
+          path = "android/app/build.gradle.kts"
+          with open(path, "r") as f:
+              content = f.read()
+          content = content.replace("compileSdk = flutter.compileSdkVersion", "compileSdk = 34")
+          content = content.replace("targetSdk = flutter.targetSdkVersion", "targetSdk = 34")
+          content = content.replace("minSdk = flutter.minSdkVersion", "minSdk = 24")
+          with open(path, "w") as f:
+              f.write(content)
+          print("Gradle SDK successfully updated to 34!")
+          '
 
       - name: Build APK (Release)
         run: flutter build apk --release
