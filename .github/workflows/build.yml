@@ -1,6 +1,5 @@
 name: Build Flutter Android APK
 
-# Ye action tab chalega jab aap main branch me code push karenge ya manual button dabayenge
 on:
   push:
     branches:
@@ -20,7 +19,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '17' # Android build ke liye Java 17 zaroori hai
+          java-version: '17' 
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -29,6 +28,10 @@ jobs:
 
       - name: Install Dependencies
         run: flutter pub get
+
+      # Ye naya step hai jo missing Android folder automatically bana dega
+      - name: Create missing platform folders
+        run: flutter create .
 
       - name: Build APK (Release)
         run: flutter build apk --release
