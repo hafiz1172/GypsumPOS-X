@@ -9,6 +9,7 @@ import 'return_screen.dart';
 import 'customer_ledger_screen.dart';
 import 'products_screen.dart';
 import 'invoice_history_screen.dart';
+import 'settings_screen.dart'; // Settings screen ki nayi import
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -68,10 +69,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('POP Khata Workshop', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.teal,
+        title: const Text('POP Khata', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF1565C0), // Thora professional blue color
         foregroundColor: Colors.white,
         actions: [
+          // Naya Settings Button
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              ).then((_) => _loadDashboardData());
+            },
+          ),
           // Cloud Sync Badge
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
@@ -82,6 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 backgroundColor: Colors.redAccent,
                 child: IconButton(
                   icon: const Icon(Icons.cloud_sync),
+                  tooltip: 'Sync Data',
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Syncing data to Google Sheets... (Coming Soon)')),
