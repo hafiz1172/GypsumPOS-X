@@ -29,9 +29,15 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      # Ye naya step hai jo missing Android folder automatically bana dega
       - name: Create missing platform folders
         run: flutter create .
+
+      # YEH NAYA STEP HAI - Android version ko latest (34) par force karne ke liye
+      - name: Fix Android SDK Versions
+        run: |
+          sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
+          sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
+          sed -i 's/flutter.minSdkVersion/24/g' android/app/build.gradle
 
       - name: Build APK (Release)
         run: flutter build apk --release
