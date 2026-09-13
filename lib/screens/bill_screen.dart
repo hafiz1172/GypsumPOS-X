@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../models/invoice.dart';
 import '../models/customer.dart';
 import '../services/database_helper.dart';
+import '../services/export_service.dart'; // Naya Export Service Import
 
 class BillScreen extends StatefulWidget {
   const BillScreen({super.key});
@@ -144,7 +145,7 @@ class _BillScreenState extends State<BillScreen> {
       subTotal: _subTotal,
       cashReceived: cashRcvd,
       udharAmount: udharAmt,
-      items: _cartItems,
+      items: List.from(_cartItems), // Clone the list
       isSynced: 0, // Sync logic run honi baqi hai
     );
 
@@ -156,7 +157,7 @@ class _BillScreenState extends State<BillScreen> {
         backgroundColor: Colors.green,
       ));
       
-      // Share / Print option popup (Isay baad me expand karenge)
+      // Updated Share / Print option popup
       _showSharePrintDialog(newInvoice);
 
       // Reset Screen
@@ -170,27 +171,50 @@ class _BillScreenState extends State<BillScreen> {
     }
   }
 
+  // NAYA EXPORT / SHARE DIALOG
   void _showSharePrintDialog(Invoice invoice) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('Bill Ban Gaya!'),
-        content: const Text('Aap isay print ya share karna chahte hain?'),
+        title: const Text('Bill Ban Gaya! \nPrint ya Share karein?', textAlign: TextAlign.center),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: Colors.blueGrey[800],
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                ExportService.shareAsTextForThermal(invoice);
+                Navigator.pop(ctx);
+              },
+              icon: const Icon(Icons.receipt),
+              label: const Text('Thermal Print (RawBT)'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                ExportService.shareAsPdf(invoice);
+                Navigator.pop(ctx);
+              },
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('WhatsApp PDF Share'),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx), // Close
-            child: const Text('Baad Me'),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close', style: TextStyle(color: Colors.grey)),
           ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(ctx);
-              // TODO: RawBT Thermal Print ya PDF Share logic yahan call hogi
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Printing/Sharing module jaldi aa raha hai...')));
-            },
-            icon: const Icon(Icons.share),
-            label: const Text('Share / Print'),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
-          )
         ],
       ),
     );
