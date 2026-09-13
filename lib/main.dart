@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'screens/dashboard_screen.dart'; // Isko baad me uncomment karenge
+import 'screens/dashboard_screen.dart'; // Ab ye screen import ho rahi hai
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,12 +22,7 @@ class PopKhataApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Dashboard Coming Soon...'),
-        ),
-      ),
-      // home: const DashboardScreen(), // Dashboard banne ke baad ye use hoga
+      home: const DashboardScreen(), // Yahan direct Dashboard open hoga
     );
   }
 }
