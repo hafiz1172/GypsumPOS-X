@@ -1,0 +1,34 @@
+name: pop_khata
+description: Offline-first POS and Ledger App for POP Workshop.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # State Management
+  provider: ^6.1.1
+  # Local Database
+  sqflite: ^2.3.0
+  path_provider: ^2.1.2
+  # API for Google Sheets
+  http: ^1.1.2
+  # Printing & Export
+  pdf: ^3.10.7
+  printing: ^5.11.1
+  # Image Handling
+  image_picker: ^1.0.7
+  # UI Utilities
+  intl: ^0.18.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
