@@ -32,20 +32,34 @@ jobs:
       - name: Create missing platform folders
         run: flutter create --platforms android .
 
-      - name: Force Android SDK 36 (Final Fix)
+      - name: Force Android SDK 36 For ALL Plugins (Master Fix)
         run: |
+          # 1. Update flutter environment properties
+          echo "flutter.compileSdkVersion=36" > android/local.properties
+          echo "flutter.targetSdkVersion=36" >> android/local.properties
+          echo "flutter.minSdkVersion=24" >> android/local.properties
+          
+          # 2. Force app level SDKs
           sed -i 's/flutter.compileSdkVersion/36/g' android/app/build.gradle || true
           sed -i 's/flutter.targetSdkVersion/36/g' android/app/build.gradle || true
           sed -i 's/flutter.minSdkVersion/24/g' android/app/build.gradle || true
-          sed -i 's/flutter.compileSdkVersion/36/g' android/app/build.gradle.kts || true
-          sed -i 's/flutter.targetSdkVersion/36/g' android/app/build.gradle.kts || true
-          sed -i 's/flutter.minSdkVersion/24/g' android/app/build.gradle.kts || true
-          
-          # Naye Flutter version ke liye direct replacement
           sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/g' android/app/build.gradle.kts || true
           sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 36/g' android/app/build.gradle.kts || true
           sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 24/g' android/app/build.gradle.kts || true
-
+          
+          # 3. Force ALL 3rd party plugins (like printing) to use SDK 36
+          cat <<EOF >> android/build.gradle
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          compileSdkVersion 36
+                      }
+                  }
+              }
+          }
+          EOF
+          
       - name: Build APK (Release)
         run: flutter build apk --release
 
