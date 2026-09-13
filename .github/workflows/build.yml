@@ -30,14 +30,18 @@ jobs:
         run: flutter pub get
 
       - name: Create missing platform folders
-        run: flutter create .
+        # Sirf Android folder create karne ke liye explicit command
+        run: flutter create --platforms android .
 
-      # YEH NAYA STEP HAI - Android version ko latest (34) par force karne ke liye
       - name: Fix Android SDK Versions
+        # Ye dono (groovy aur kotlin) files check karega
         run: |
-          sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle
-          sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle
-          sed -i 's/flutter.minSdkVersion/24/g' android/app/build.gradle
+          sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle || true
+          sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle || true
+          sed -i 's/flutter.minSdkVersion/24/g' android/app/build.gradle || true
+          sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle.kts || true
+          sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle.kts || true
+          sed -i 's/flutter.minSdkVersion/24/g' android/app/build.gradle.kts || true
 
       - name: Build APK (Release)
         run: flutter build apk --release
