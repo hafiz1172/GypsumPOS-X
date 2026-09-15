@@ -43,7 +43,33 @@ jobs:
           content = content.replace("minSdk = flutter.minSdkVersion", "minSdk = 24")
           with open(path, "w") as f:
               f.write(content)
-          print("Gradle SDK successfully updated to 34!")
+          print("Gradle SDK successfully updated to 36!")
+          '
+
+      - name: Force compileSdk 36 for all modules (app + plugins)
+        run: |
+          python3 -c '
+          path = "android/build.gradle.kts"
+          with open(path, "r") as f:
+              content = f.read()
+
+          override = """
+subprojects {
+    afterEvaluate {
+        if (extensions.findByName("android") != null) {
+            extensions.configure<com.android.build.gradle.BaseExtension> {
+                compileSdkVersion(36)
+            }
+        }
+    }
+}
+"""
+          if "compileSdkVersion(36)" not in content:
+              content += override
+
+          with open(path, "w") as f:
+              f.write(content)
+          print("Forced compileSdk 36 on all subprojects (plugins included)!")
           '
 
       - name: Build APK (Release)
