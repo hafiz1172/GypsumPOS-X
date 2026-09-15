@@ -21,13 +21,6 @@ dependencies:
   # API for Google Sheets
   http: ^1.1.2
   
-  # Printing & Export (PDF)
-  pdf: ^3.10.7
-  printing: ^5.11.1
-  
-  # Text Sharing (For RawBT Thermal Print)
-  share_plus: ^9.0.0
-  
   # Image Handling
   image_picker: ^1.0.7
   
