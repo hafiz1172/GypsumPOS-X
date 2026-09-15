@@ -32,46 +32,6 @@ jobs:
       - name: Create missing platform folders
         run: flutter create --platforms android .
 
-      - name: Fix SDK version via Python
-        run: |
-          python3 -c '
-          path = "android/app/build.gradle.kts"
-          with open(path, "r") as f:
-              content = f.read()
-          content = content.replace("compileSdk = flutter.compileSdkVersion", "compileSdk = 36")
-          content = content.replace("targetSdk = flutter.targetSdkVersion", "targetSdk = 34")
-          content = content.replace("minSdk = flutter.minSdkVersion", "minSdk = 24")
-          with open(path, "w") as f:
-              f.write(content)
-          print("Gradle SDK successfully updated to 36!")
-          '
-
-      - name: Force compileSdk 36 for all modules (app + plugins)
-        run: |
-          python3 -c '
-          path = "android/build.gradle.kts"
-          with open(path, "r") as f:
-              content = f.read()
-
-          override = """
-subprojects {
-    afterEvaluate {
-        if (extensions.findByName("android") != null) {
-            extensions.configure<com.android.build.gradle.BaseExtension> {
-                compileSdkVersion(36)
-            }
-        }
-    }
-}
-"""
-          if "compileSdkVersion(36)" not in content:
-              content += override
-
-          with open(path, "w") as f:
-              f.write(content)
-          print("Forced compileSdk 36 on all subprojects (plugins included)!")
-          '
-
       - name: Build APK (Release)
         run: flutter build apk --release
 
